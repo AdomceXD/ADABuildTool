@@ -2,6 +2,8 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <chrono> // For timekeeping
+#include <cstdlib> // For system()
 
 int main() {
     std::ifstream configFile("BebulaBuild.cfg");
@@ -23,15 +25,26 @@ int main() {
             }
         }
         configFile.close();
+
         std::stringstream concatenatedArgs;
         concatenatedArgs << "g++ " << buildFile << " " << buildArgs << " " << executableName << " " << linkers;
+
+        // Measure the time taken to compile
+        auto start = std::chrono::high_resolution_clock::now();
         int result = system(concatenatedArgs.str().c_str());
+        auto end = std::chrono::high_resolution_clock::now();
+
         if (result == 0) {
             std::cout << "Compilation successful." << std::endl;
         } else {
             std::cerr << "Compilation failed." << std::endl;
             return 1;
         }
+
+        // Calculate and display the elapsed time
+        std::chrono::duration<double> elapsed = end - start;
+        std::cout << "Time taken to compile: " << elapsed.count() << " seconds." << std::endl;
+
     } else {
         std::cerr << "Unable to open config file." << std::endl;
         return 1;
